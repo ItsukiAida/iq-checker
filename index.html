@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IQの目安テスト（時間制限版・娯楽用）｜相田樹</title>
+<meta name="description" content="全20問のIQの目安テスト（時間制限版）。1問30秒・全体15分。数列・言葉・論理・図形・推理の5分野。娯楽用の目安です。">
+<meta property="og:title" content="IQの目安テスト（時間制限版）｜相田樹">
+<meta property="og:description" content="全20問・1問30秒・全体15分。あなたの「考える力」の目安を測ってみよう。娯楽用の目安です。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://itsukiaida.github.io/iq-checker/">
+<meta property="og:image" content="https://itsukiaida.github.io/iq-checker/ogp.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;
+    background:#1c2430; color:#f2f4f7;
+    display:flex; flex-direction:column; align-items:center;
+    padding:10px 12px 48px; /* 下部に約40px以上の余白（システムボタン対策） */
+    overflow:hidden;
+  }
+  #app { width:100%; max-width:520px; height:100%; display:flex; flex-direction:column; }
+  header { text-align:center; padding:6px 0 4px; }
+  header h1 { font-size:22px; letter-spacing:.05em; }
+  header p { font-size:13px; color:#aeb9c6; margin-top:2px; }
+  #hud { display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#aeb9c6; padding:6px 2px; }
+  #barWrap { flex:1; height:8px; background:#333f4f; border-radius:4px; margin:0 10px; overflow:hidden; }
+  #bar { height:100%; width:0%; background:#5ec46a; border-radius:4px; transition:width .3s; }
+  #card {
+    flex:1; background:#26313f; border-radius:14px; padding:16px 14px;
+    display:flex; flex-direction:column; overflow-y:auto;
+    box-shadow:0 4px 14px rgba(0,0,0,.35);
+  }
+  .cat { font-size:13px; color:#8fd694; font-weight:bold; margin-bottom:8px; }
+  .qtext { font-size:19px; line-height:1.55; margin-bottom:14px; white-space:pre-wrap; }
+  .figbox { background:#fff; border-radius:10px; padding:10px; margin-bottom:14px; display:flex; justify-content:center; }
+  .figbox svg { max-width:100%; height:auto; }
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:auto; }
+  .choices.single { grid-template-columns:1fr; }
+  button.choice {
+    background:#35465a; color:#fff; border:2px solid #46586e; border-radius:10px;
+    padding:14px 8px; font-size:18px; cursor:pointer; min-height:56px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  button.choice:active { background:#5ec46a; border-color:#5ec46a; }
+  button.choice.fig { background:#fff; padding:8px; }
+  button.main {
+    background:#5ec46a; color:#10240f; border:none; border-radius:10px;
+    padding:15px; font-size:19px; font-weight:bold; cursor:pointer; width:100%; margin-top:14px;
+  }
+  button.sub {
+    background:#35465a; color:#fff; border:2px solid #46586e; border-radius:10px;
+    padding:12px; font-size:16px; cursor:pointer; width:100%; margin-top:10px;
+  }
+  .note { font-size:13.5px; color:#aeb9c6; line-height:1.7; margin-top:10px; }
+  #fontBtn { display:block; margin:12px auto 0; background:none; border:1px solid #4a5a75; color:#aeb9c6; border-radius:8px; padding:7px 16px; font-size:14px; cursor:pointer; }
+  html[data-font="big"] body { font-size:19px; }
+  html[data-font="big"] .qtext { font-size:23px; }
+  html[data-font="big"] .choice { font-size:20px; }
+  html[data-font="big"] .note { font-size:16px; }
+  footer { margin-top:22px; padding-top:12px; border-top:1px solid #333f55; font-size:12.5px; color:#8494a9; line-height:1.7; text-align:center; }
+  .big { font-size:44px; font-weight:bold; text-align:center; margin:10px 0 2px; }
+  .mid { font-size:19px; text-align:center; line-height:1.6; }
+  .catbar { margin-top:10px; }
+  .catbar .row { display:flex; justify-content:space-between; font-size:14.5px; margin-bottom:3px; }
+  .catbar .track { height:10px; background:#333f4f; border-radius:5px; overflow:hidden; }
+  .catbar .fill { height:100%; background:#5ec46a; }
+  #sizeBtn { position:absolute; top:8px; right:10px; background:#35465a; color:#fff; border:1px solid #46586e; border-radius:8px; padding:6px 10px; font-size:13px; }
+  body.large .qtext { font-size:22px; }
+  body.large button.choice { font-size:21px; }
+</style>
+</head>
+<body>
+<button id="sizeBtn">文字 大</button>
+<div id="app">
+  <header>
+    <h1>IQの目安テスト（時間制限版）</h1>
+    <p>娯楽用の目安です。正式な知能検査ではありません</p>
+  </header>
+  <div id="hud" style="visibility:hidden">
+    <span id="qnum"></span>
+    <div id="barWrap"><div id="bar"></div></div>
+    <span id="timer"></span>
+  </div>
+  <div id="totalLine" style="visibility:hidden; display:flex; justify-content:space-between; font-size:14px; color:#aeb9c6; padding:0 2px 6px;">
+    <span>全体の残り時間</span><span id="totalTimer"></span>
+  </div>
+  <div id="warn" style="display:none; background:#a33c2e; color:#fff; font-size:16px; font-weight:bold; text-align:center; border-radius:8px; padding:9px; margin-bottom:8px;">全体の残り時間 あと3分です</div>
+  <div id="card"></div>
+  <button id="fontBtn">文字 大</button>
+  <footer>
+    IQの目安テスト（時間制限版） © 2026 相田樹<br>
+    このテストはブラウザの中だけで動作します。回答や結果が外部に送信されることはありません。<br>
+    娯楽用の目安であり、正式な知能検査ではありません。
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ---------- 図形ヘルパー ---------- */
+function shapeSVG(kind, color, size, rot){
+  size = size || 34; rot = rot || 0;
+  var c = color || "#333";
+  var inner = "";
+  if(kind==="circle") inner = '<circle cx="25" cy="25" r="17" fill="'+c+'"/>';
+  else if(kind==="square") inner = '<rect x="9" y="9" width="32" height="32" fill="'+c+'"/>';
+  else if(kind==="triangle") inner = '<polygon points="25,7 44,42 6,42" fill="'+c+'"/>';
+  else if(kind==="diamond") inner = '<polygon points="25,5 45,25 25,45 5,25" fill="'+c+'"/>';
+  else if(kind==="star") inner = '<polygon points="25,4 31,19 47,19 34,29 39,45 25,35 11,45 16,29 3,19 19,19" fill="'+c+'"/>';
+  else if(kind==="ring") inner = '<circle cx="25" cy="25" r="17" fill="none" stroke="'+c+'" stroke-width="7"/>';
+  else if(kind==="half") inner = '<path d="M25 8 A17 17 0 0 1 25 42 Z" fill="'+c+'"/>';
+  else if(kind==="cross") inner = '<path d="M19 6 h12 v13 h13 v12 h-13 v13 h-12 v-13 h-13 v-12 h13 Z" fill="'+c+'"/>';
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 50 50"><g transform="rotate('+rot+' 25 25)">'+inner+'</g></svg>';
+}
+function seqFig(items, cell){
+  cell = cell || 54;
+  var w = items.length * cell;
+  var s = '<svg width="'+w+'" height="'+cell+'" viewBox="0 0 '+w+' '+cell+'">';
+  items.forEach(function(it,i){
+    s += '<g transform="translate('+(i*cell+2)+',2)">'+
+      '<rect x="0" y="0" width="'+(cell-4)+'" height="'+(cell-4)+'" fill="none" stroke="#bbb" stroke-width="1"/>';
+    if(it.k==="?"){
+      s += '<text x="'+(cell/2-2)+'" y="'+(cell/2+8)+'" font-size="26" text-anchor="middle" fill="#888">?</text>';
+    } else {
+      s += '<g transform="translate(2,2) scale('+((cell-8)/50)+')">'+ shapeSVG(it.k, it.c||"#333", 50, it.r||0).replace(/<svg[^>]*>|<\/svg>/g,"") +'</g>';
+    }
+    s += '</g>';
+  });
+  return s + '</svg>';
+}
+function matrixFig(cells){ /* cells: 9要素（最後は "?"） */
+  var cell = 54, w = cell*3;
+  var s = '<svg width="'+w+'" height="'+w+'" viewBox="0 0 '+w+' '+w+'">';
+  cells.forEach(function(it,i){
+    var x = (i%3)*cell, y = Math.floor(i/3)*cell;
+    s += '<g transform="translate('+(x+2)+','+(y+2)+')">'+
+      '<rect x="0" y="0" width="'+(cell-4)+'" height="'+(cell-4)+'" fill="none" stroke="#999" stroke-width="1.2"/>';
+    if(it==="?"){
+      s += '<text x="'+(cell/2-2)+'" y="'+(cell/2+8)+'" font-size="26" text-anchor="middle" fill="#888">?</text>';
+    } else {
+      s += '<g transform="translate(2,2) scale('+((cell-8)/50)+')">'+ shapeSVG(it.k, it.c||"#333", 50, it.r||0).replace(/<svg[^>]*>|<\/svg>/g,"") +'</g>';
+    }
+    s += '</g>';
+  });
+  return s + '</svg>';
+}
+
+/* ---------- 問題バンク ---------- */
+/* type: text=文字選択肢, fig=図形選択肢 */
+var BANK = [
+ /* 数列 */
+ {cat:"数列", q:"次の数列の「？」に入る数は？\n2, 6, 12, 20, 30, ？", ch:["40","42","44","36"], a:1},
+ {cat:"数列", q:"次の数列の「？」に入る数は？\n1, 1, 2, 3, 5, 8, ？", ch:["11","12","13","15"], a:2},
+ {cat:"数列", q:"次の数列の「？」に入る数は？\n81, 27, 9, 3, ？", ch:["1","0","2","1.5"], a:0},
+ {cat:"数列", q:"次の数列の「？」に入る数は？\n3, 7, 16, 35, 74, ？", ch:["148","153","121","160"], a:1},
+ {cat:"数列", q:"次の数列の「？」に入る数は？\n1, 4, 9, 16, 25, ？", ch:["30","32","36","49"], a:2},
+ {cat:"数列", q:"次の数列の「？」に入る数は？\n5, 10, 7, 14, 11, 22, ？", ch:["19","25","16","33"], a:0},
+ /* 言葉 */
+ {cat:"言葉", q:"「本」と「読む」の関係に一番近いのは？\n「歌」と ？", ch:["聞く","歌う","作る","楽譜"], a:1},
+ {cat:"言葉", q:"「鳥」に対して「空」が、「魚」に対しては？", ch:["川","泳ぐ","エラ","海だけ"], a:0},
+ {cat:"言葉", q:"仲間はずれはどれ？", ch:["りんご","みかん","ぶどう","じゃがいも"], a:3},
+ {cat:"言葉", q:"「暑い」の反対は「寒い」。「重い」の反対は？", ch:["軽い","小さい","弱い","速い"], a:0},
+ {cat:"言葉", q:"「医者」が「病院」で働くように、「教師」が働くのは？", ch:["生徒","学校","授業","黒板"], a:1},
+ {cat:"言葉", q:"仲間はずれはどれ？", ch:["犬","猫","馬","鯨"], a:3},
+ /* 論理・計算 */
+ {cat:"論理・計算", q:"あるクラスの生徒は全員が眼鏡をかけているわけではない。正しいのは？", ch:["眼鏡をかけていない生徒がいる","全員が眼鏡をかけていない","眼鏡をかけている生徒はいない","半分は眼鏡をかけている"], a:0},
+ {cat:"論理・計算", q:"AはBより重い。CはBより重いがAより軽い。重い順に並べると？", ch:["A, C, B","C, A, B","A, B, C","B, C, A"], a:0},
+ {cat:"論理・計算", q:"17 × 6 は？", ch:["96","102","112","92"], a:1},
+ {cat:"論理・計算", q:"3人で30個のりんごを分けると1人10個。6人で同じ30個を分けると1人何個？", ch:["3個","5個","6個","10個"], a:1},
+ {cat:"論理・計算", q:"「すべてのバラは花である」「ある花は赤い」。必ず言えるのは？", ch:["すべてのバラは赤い","あるバラは赤い","バラは花の一種である","赤い花はすべてバラ"], a:2},
+ {cat:"論理・計算", q:"144 ÷ 12 × 3 は？", ch:["4","36","48","30"], a:1},
+ /* 図形の系列 */
+ {cat:"図形", q:"並びの規則を見つけて、「？」に入る図形を選んでください。",
+   fig:function(){ return seqFig([{k:"circle"},{k:"square"},{k:"triangle"},{k:"circle"},{k:"square"},{k:"?"}]); },
+   fch:["triangle","circle","diamond","square"], fa:0, fkind:true},
+ {cat:"図形", q:"並びの規則を見つけて、「？」に入る図形を選んでください。",
+   fig:function(){ return seqFig([{k:"circle",c:"#333"},{k:"circle",c:"#333"},{k:"square",c:"#333"},{k:"circle",c:"#333"},{k:"circle",c:"#333"},{k:"square",c:"#333"},{k:"circle",c:"#333"},{k:"circle",c:"#333"},{k:"?"}]); },
+   fch:["square","circle","triangle","diamond"], fa:0, fkind:true, note:"丸2つ＋四角1つの繰り返しです"},
+ {cat:"図形", q:"並びの規則を見つけて、「？」に入る図形を選んでください。",
+   fig:function(){ return seqFig([{k:"triangle",r:0},{k:"triangle",r:90},{k:"triangle",r:180},{k:"triangle",r:270},{k:"?"}]); },
+   fch:["triangle:0","triangle:90","triangle:180","triangle:270"], fa:0, fkind:true, frot:true},
+ {cat:"図形", q:"3×3の表の規則を見つけて、「？」に入る図形を選んでください。",
+   fig:function(){ return matrixFig([{k:"circle"},{k:"square"},{k:"diamond"},{k:"square"},{k:"diamond"},{k:"circle"},{k:"diamond"},{k:"circle"},"?" ]); },
+   fch:["square","circle","diamond","triangle"], fa:0, fkind:true},
+ {cat:"図形", q:"3×3の表の規則を見つけて、「？」に入る図形を選んでください。",
+   fig:function(){ return matrixFig([{k:"triangle"},{k:"triangle",r:90},{k:"triangle",r:180},{k:"triangle",r:90},{k:"triangle",r:180},{k:"triangle",r:270},{k:"triangle",r:180},{k:"triangle",r:270},"?"]); },
+   fch:["triangle:0","triangle:90","triangle:180","triangle:270"], fa:0, fkind:true, frot:true},
+ {cat:"図形", q:"並びの規則を見つけて、「？」に入る図形を選んでください。",
+   fig:function(){ return seqFig([{k:"star"},{k:"ring"},{k:"star"},{k:"ring"},{k:"star"},{k:"?"}]); },
+   fch:["ring","star","circle","square"], fa:0, fkind:true},
+ /* 推理 */
+ {cat:"推理", q:"太郎は花子より背が高い。花子は次郎より背が高い。一番背が低いのは？", ch:["太郎","花子","次郎","分からない"], a:2},
+ {cat:"推理", q:"箱の中に赤い玉が3個、白い玉が2個ある。目をつぶって1個取るとき、赤い玉が出る確率が高いのはなぜ？", ch:["赤い玉の方が重いから","赤い玉の数が多いから","白い玉は小さいから","運がいいから"], a:1},
+ {cat:"推理", q:"月曜日の3日後は木曜日。では、木曜日の4日前は？", ch:["日曜日","月曜日","土曜日","金曜日"], a:0},
+ {cat:"推理", q:"ある数を2倍して6を引くと20になる。その数は？", ch:["11","12","13","14"], a:2},
+ {cat:"推理", q:"午前9時から3時間45分後は？", ch:["12時45分","12時30分","13時15分","12時15分"], a:0},
+ {cat:"推理", q:"100円の品物を2割引で買うと何円？", ch:["70円","75円","80円","85円"], a:2}
+];
+
+/* ---------- 進行管理 ---------- */
+var TEST_N = 20;
+var Q_LIMIT = 30;        /* 1問あたりの制限時間（秒） */
+var TOTAL_LIMIT = 900;   /* 全体の制限時間（秒）= 15分 */
+var WARN_AT = 180;       /* 全体の残りがこの秒数になったら知らせる */
+var questions = [], idx = 0, correct = 0, catStat = {}, startTime = 0;
+var qEnd = 0, totalEnd = 0, tickId = null, warned = false, timeUp = false;
+var card = document.getElementById("card");
+var hud = document.getElementById("hud");
+var totalLine = document.getElementById("totalLine");
+var warnBox = document.getElementById("warn");
+
+function shuffle(arr){ var a = arr.slice(); for(var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+function start(){
+  var byCat = {};
+  BANK.forEach(function(q){ (byCat[q.cat] = byCat[q.cat] || []).push(q); });
+  questions = [];
+  Object.keys(byCat).forEach(function(c){
+    var picked = shuffle(byCat[c]).slice(0, 4); /* 各分野4問ずつ = 20問 */
+    questions = questions.concat(picked);
+  });
+  questions = shuffle(questions).slice(0, TEST_N);
+  idx = 0; correct = 0; catStat = {}; warned = false; timeUp = false;
+  questions.forEach(function(q){ catStat[q.cat] = catStat[q.cat] || {ok:0, all:0}; catStat[q.cat].all++; });
+  startTime = Date.now();
+  totalEnd = startTime + TOTAL_LIMIT * 1000;
+  hud.style.visibility = "visible";
+  totalLine.style.visibility = "visible";
+  warnBox.style.display = "none";
+  if(tickId) clearInterval(tickId);
+  tickId = setInterval(tick, 200);
+  showQ();
+}
+
+function fmt(sec){ sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec/60) + ":" + ("0" + (sec%60)).slice(-2); }
+
+function tick(){
+  var now = Date.now();
+  var trem = (totalEnd - now) / 1000;
+  document.getElementById("totalTimer").textContent = fmt(trem);
+  if(trem <= WARN_AT && !warned){
+    warned = true;
+    warnBox.style.display = "block";
+    document.getElementById("totalTimer").style.color = "#ff9a8a";
+    document.getElementById("totalTimer").style.fontWeight = "bold";
+  }
+  if(trem <= 0){
+    timeUp = true;
+    showResult();
+    return;
+  }
+  var qrem = (qEnd - now) / 1000;
+  var t = document.getElementById("timer");
+  t.textContent = "この問題 あと" + Math.max(0, Math.ceil(qrem)) + "秒";
+  t.style.color = qrem <= 10 ? "#ff9a8a" : "";
+  t.style.fontWeight = qrem <= 10 ? "bold" : "";
+  if(qrem <= 0){
+    /* 時間切れ：不正解として次へ */
+    idx++;
+    if(idx < questions.length) showQ(); else showResult();
+  }
+}
+
+function figChoiceHTML(spec){
+  if(spec.indexOf(":") >= 0){ var p = spec.split(":"); return shapeSVG(p[0], "#333", 44, parseInt(p[1],10)); }
+  return shapeSVG(spec, "#333", 44, 0);
+}
+
+function showQ(){
+  var q = questions[idx];
+  qEnd = Date.now() + Q_LIMIT * 1000;
+  document.getElementById("qnum").textContent = (idx+1) + " / " + questions.length;
+  document.getElementById("bar").style.width = (idx / questions.length * 100) + "%";
+  var html = '<div class="cat">分野：' + q.cat + '</div><div class="qtext">' + q.q + '</div>';
+  if(q.fig){ html += '<div class="figbox">' + q.fig() + '</div>'; }
+  html += '<div class="choices' + (q.fkind ? "" : " single") + '">';
+  if(q.fkind){
+    var order = shuffle(q.fch.map(function(c,i){ return {c:c, i:i}; }));
+    order.forEach(function(o){
+      html += '<button class="choice fig" data-ok="' + (o.i === q.fa ? 1 : 0) + '">' + figChoiceHTML(o.c) + '</button>';
+    });
+  } else {
+    var order2 = shuffle(q.ch.map(function(c,i){ return {c:c, i:i}; }));
+    order2.forEach(function(o){
+      html += '<button class="choice" data-ok="' + (o.i === q.a ? 1 : 0) + '">' + o.c + '</button>';
+    });
+  }
+  html += '</div>';
+  card.innerHTML = html;
+  card.scrollTop = 0;
+  Array.prototype.forEach.call(card.querySelectorAll("button.choice"), function(b){
+    b.addEventListener("click", function(){
+      var ok = b.getAttribute("data-ok") === "1";
+      if(ok){ correct++; catStat[q.cat].ok++; }
+      idx++;
+      if(idx < questions.length) showQ(); else showResult();
+    });
+  });
+}
+
+function iqFrom(c, n){
+  var raw = 100 + (c - n * 0.575) * 4.5; /* 平均的な正解数を100に置く目安式 */
+  if(raw > 145) raw = 145; if(raw < 65) raw = 65;
+  return Math.round(raw);
+}
+
+function showResult(){
+  if(tickId){ clearInterval(tickId); tickId = null; }
+  hud.style.visibility = "hidden";
+  totalLine.style.visibility = "hidden";
+  warnBox.style.display = "none";
+  var iq = iqFrom(correct, questions.length);
+  var sec = Math.round((Date.now() - startTime) / 1000);
+  if(sec > TOTAL_LIMIT) sec = TOTAL_LIMIT;
+  var comment = iq >= 130 ? "かなり高い水準です。規則を見抜く力が冴えています。" :
+    iq >= 115 ? "平均より高めです。考える問題が得意なタイプかもしれません。" :
+    iq >= 100 ? "平均の範囲内です。バランスの取れた結果でした。" :
+    iq >= 85 ? "平均の下のほうです。図形や数列は慣れで伸びやすい分野です。" :
+    "今回は低めに出ました。体調や慣れでも大きく変わるので、目安として受け取ってください。";
+  var html = '<div class="cat">結果</div>' +
+    '<div class="mid">推定IQの目安</div>' +
+    '<div class="big">' + iq + '</div>' +
+    '<div class="mid">（目安の幅：' + Math.max(60, iq-6) + '〜' + Math.min(150, iq+6) + '）</div>' +
+    (timeUp ? '<div class="mid" style="color:#ff9a8a">全体の制限時間になったため、ここで終了しました（未回答は不正解）</div>' : '') +
+    '<div class="mid" style="margin-top:8px">正解 ' + correct + ' / ' + questions.length + ' 問 ・ かかった時間 ' + Math.floor(sec/60) + '分' + (sec%60) + '秒</div>' +
+    '<p class="note">' + comment + '</p>' +
+    '<div style="margin-top:14px"><div class="cat">分野別の正解率</div>';
+  Object.keys(catStat).forEach(function(c){
+    var s = catStat[c]; var pct = s.all ? Math.round(s.ok / s.all * 100) : 0;
+    html += '<div class="catbar"><div class="row"><span>' + c + '</span><span>' + s.ok + '/' + s.all + '</span></div>' +
+      '<div class="track"><div class="fill" style="width:' + pct + '%"></div></div></div>';
+  });
+  html += '</div>' +
+    '<p class="note">※これは娯楽用の簡易テストです。正式な知能検査（WAISなど）とは測り方も基準も違うため、数値はあくまで目安として楽しんでください。問題は毎回シャッフルされ、出題も一部入れ替わります。</p>' +
+    '<button class="sub" id="copyBtn">結果をコピーする</button>' +
+    '<div class="mid" id="copyMsg" style="font-size:14px; color:#7fd08a; min-height:20px;"></div>' +
+    '<button class="main" id="retry">もう一度やってみる</button>';
+  card.innerHTML = html;
+  var copyText = "【IQの目安テスト（時間制限版）】推定IQ " + iq + "（目安 " + Math.max(60, iq-6) + "〜" + Math.min(150, iq+6) + "）／正解 " + correct + " / " + questions.length + " 問でした。※娯楽用の目安です\nhttps://itsukiaida.github.io/iq-checker/";
+  document.getElementById("copyBtn").addEventListener("click", function(){
+    var msg = document.getElementById("copyMsg");
+    function done(){ msg.textContent = "コピーしました。SNSやnoteに貼れます。"; }
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = copyText;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); }
+      catch(e){ msg.textContent = "コピーできませんでした。"; }
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(copyText).then(done, fallback);
+    } else { fallback(); }
+  });
+  document.getElementById("retry").addEventListener("click", intro);
+}
+
+function intro(){
+  hud.style.visibility = "hidden";
+  totalLine.style.visibility = "hidden";
+  warnBox.style.display = "none";
+  card.innerHTML =
+    '<div class="qtext">全20問。数列・言葉・論理・図形・推理の5分野から出題します。</div>' +
+    '<p class="note">・1問の制限時間は30秒です。過ぎると不正解として自動で次に進みます<br>・全体の制限時間は15分です。残り3分になると画面の上にお知らせが出ます<br>・全体の時間切れになったら、その時点で終了して結果を表示します<br>・選択肢をタップすると次の問題に進みます（戻れません）</p>' +
+    '<button class="main" id="go">テストを始める</button>';
+  document.getElementById("go").addEventListener("click", start);
+}
+
+document.getElementById("sizeBtn").addEventListener("click", function(){
+  document.body.classList.toggle("large");
+  this.textContent = document.body.classList.contains("large") ? "文字 標準" : "文字 大";
+});
+
+/* ---------- 文字サイズ切り替え ---------- */
+var fontBtn = document.getElementById("fontBtn");
+fontBtn.addEventListener("click", function(){
+  var big = document.documentElement.getAttribute("data-font") === "big";
+  if(big){ document.documentElement.removeAttribute("data-font"); fontBtn.textContent = "文字 大"; }
+  else { document.documentElement.setAttribute("data-font", "big"); fontBtn.textContent = "文字 標準"; }
+});
+
+intro();
+</script>
+</body>
+</html>
